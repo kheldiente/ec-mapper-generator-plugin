@@ -1,0 +1,1 @@
+ec-mapper-generator-plugin
