@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.englishcentral.android.ec-mapper-generator-plugin</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>EC Mapping Class Generator</name>
+    <vendor email="android@englishcentral.com" url="http://www.englishcentral.com">English Central Inc</vendor>
 
     <description><![CDATA[
     Enter short description for your plugin here.<br>
@@ -19,6 +19,13 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="EnglishCentral.TopMenu"
+                text="_EnglishCentral"
+                popup="true">
+            <add-to-group group-id="MainMenu" anchor="last" />
+            <action id="MapClassGenerator"
+                class="actions.PluginAction"
+                text="_MapClassGenerator" />
+        </group>
     </actions>
 </idea-plugin>

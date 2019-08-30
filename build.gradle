@@ -17,6 +17,7 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.2.1'
+    alternativeIdePath 'C:/Program Files/Android/Android Studio/'
 }
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
@@ -28,4 +29,10 @@ patchPluginXml {
     changeNotes """
       Add change notes here.<br>
       <em>most HTML tags may be used</em>"""
+
+    // To resolve plugin not loaded:
+    // - https://github.com/Vincent-P/gruvbox-intellij-theme/blob/b3d384f871eb5414f2025f795f200bca8778de4b/build.gradle
+    // - http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html
+    sinceBuild '183.0'
+    untilBuild '195.*'
 }
