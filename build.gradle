@@ -6,12 +6,19 @@ plugins {
 group 'com.englishcentral.android'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'kotlin-kapt'
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    implementation 'com.google.dagger:dagger:2.20'
+    kapt 'com.google.dagger:dagger-compiler:2.20'
+
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.5'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
