@@ -33,4 +33,7 @@ class GenerateMappingClassPanel: JPanel() {
 
     override fun getPreferredSize(): Dimension = Dimension(300, 110)
 
+    fun getClassName(): String = txtMappingClassName.text
+
+
 }

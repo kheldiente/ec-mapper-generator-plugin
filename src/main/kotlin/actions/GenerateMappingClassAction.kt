@@ -14,10 +14,13 @@ class GenerateMappingClassAction: AnAction() {
     private var directory: PsiDirectory? = null
 
     override fun actionPerformed(event: AnActionEvent) {
-        // val dialog = GenerateMappingClassDialog(e.project!!)
-        // dialog.show()
         directory = getDirectory(event) ?: return
-        print("package name of action: ${getPackageName(directory!!)}")
+
+        val absolutePath = getAbsolutePath(directory!!)
+        println("absolute path of action: $absolutePath")
+
+        val dialog = GenerateMappingClassDialog(absolutePath)
+        dialog.show()
     }
 
     companion object {
@@ -46,7 +49,7 @@ class GenerateMappingClassAction: AnAction() {
             return directory
         }
 
-        private fun getPackageName(directory: PsiDirectory): String {
+        private fun getAbsolutePath(directory: PsiDirectory): String {
             val directoryFactory = PsiDirectoryFactory.getInstance(directory.project)
             return directoryFactory.getQualifiedName(directory, true)
         }
