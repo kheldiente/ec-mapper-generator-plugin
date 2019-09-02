@@ -16,10 +16,11 @@ class GenerateMappingClassAction: AnAction() {
     override fun actionPerformed(event: AnActionEvent) {
         directory = getDirectory(event) ?: return
 
+        val project = event.project!!
         val absolutePath = getAbsolutePath(directory!!)
         println("absolute path of action: $absolutePath")
 
-        val dialog = GenerateMappingClassDialog(absolutePath)
+        val dialog = GenerateMappingClassDialog(project, absolutePath)
         dialog.show()
     }
 

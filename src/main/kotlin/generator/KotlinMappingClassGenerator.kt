@@ -14,6 +14,7 @@ class KotlinMappingClassGenerator: MappingClassGenerator {
         if (config.hasBaseClass) {
             val baseClassFile = BaseClassFile()
             var baseClassName = config.baseClassName
+
             if (baseClassName.isEmpty()) {
                 baseClassName = DEFAULT_BASE_CLASS_NAME
             }
