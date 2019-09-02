@@ -8,24 +8,24 @@
     <em>most HTML tags may be used</em>
     ]]></description>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
-    <!-- uncomment to enable plugin in all products
-    <depends>com.intellij.modules.lang</depends>
-    -->
+    <project-components>
+        <component>
+            <implementation-class>
+                component.GenerateMappingClassComponent
+            </implementation-class>
+        </component>
+    </project-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <defaultProjectTypeProvider type="Android" />
     </extensions>
 
     <actions>
-        <group id="EnglishCentral.TopMenu"
-                text="_EnglishCentral"
-                popup="true">
-            <add-to-group group-id="MainMenu" anchor="last" />
+        <group id="GenerateMappingClassMenu" popup="false">
             <action id="MapClassGenerator"
-                class="actions.PluginAction"
-                text="_MapClassGenerator" />
+                class="actions.GenerateMappingClassAction"
+                text="Generate Mapping Class..." />
+            <add-to-group group-id="ProjectViewPopupMenu" relative-to-action="NewFile" anchor="after" />
         </group>
     </actions>
 </idea-plugin>
