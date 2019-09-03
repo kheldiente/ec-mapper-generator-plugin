@@ -1,6 +1,7 @@
 package ui
 
 import com.intellij.ui.components.JBCheckBox
+import extractor.data.ClassAttribute
 import utils.StringsBundle
 import java.awt.Dimension
 import java.awt.event.ActionEvent
@@ -27,6 +28,8 @@ class GenerateMappingClassPanel: JPanel(), ItemListener, ActionListener {
     private val cbCreateBaseClass = JBCheckBox()
     private val lblFirstClass = JLabel()
 
+    var firstClassAttributes = emptyList<ClassAttribute>()
+    var secondClassAttributes = emptyList<ClassAttribute>()
     var listener: EventListener? = null
     var baseClassName: String = ""
         set(value) {
