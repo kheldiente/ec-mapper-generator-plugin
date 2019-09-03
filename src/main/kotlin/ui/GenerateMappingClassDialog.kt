@@ -6,7 +6,6 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VirtualFile
 import generator.KotlinMappingClassGenerator
 import generator.MappingClassConfig
 import extractor.data.ClassTree
@@ -67,13 +66,9 @@ class GenerateMappingClassDialog constructor(private val project: Project,
             val name = virtualFile.name
             println("file name: $name, path: $path")
 
-           classTree = getClassTree(virtualFile)
+           classTree = presenter.getClassTree(virtualFile)
         }
         return classTree
-    }
-
-    private fun getClassTree(virtualFile: VirtualFile): ClassTree {
-        return presenter.getClassTree(virtualFile)
     }
 
 }

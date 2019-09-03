@@ -27,21 +27,49 @@ class DataClassExtractor: ClassExtractor() {
         val attributes = arrayListOf<ClassAttribute>()
         Visitor.visit(nodeFile) { v, _ ->
             if (v is Node.Decl.Structured.PrimaryConstructor) {
-                val params = v.params
-                if (params.isNotEmpty()) {
-                    params.forEach { param ->
-                        val paramName = param.name
-                        val paramRef = param.type!!.ref
-                        var paramType = ""
-                        if (paramRef is Node.TypeRef.Simple) {
-                            paramType = paramRef.pieces[0].name
-                        }
-                        attributes.add(ClassAttribute(name = paramName, type = paramType))
-                    }
-                }
+                attributes.addAll(getAttrFromConstructor(v))
+            } else if (v is Node.Decl.Property) {
+                attributes.add(getAttrFromProperty(v))
             }
         }
         return attributes
+    }
+
+    private fun getAttrFromConstructor(v: Node.Decl.Structured.PrimaryConstructor): List<ClassAttribute> {
+        val params = v.params
+        val attributes = arrayListOf<ClassAttribute>()
+        if (params.isNotEmpty()) {
+            params.forEach { param ->
+                val name = param.name
+                val readOnly = param.readOnly!!
+                val ref = param.type!!.ref
+                var type = ""
+                if (ref is Node.TypeRef.Simple) {
+                    type = ref.pieces[0].name
+                }
+                attributes.add(ClassAttribute(
+                    name = name,
+                    type = type,
+                    readOnly = readOnly,
+                    isConstructorParameter = true))
+            }
+        }
+        return attributes
+    }
+
+    private fun getAttrFromProperty(v: Node.Decl.Property): ClassAttribute {
+        val attribute = ClassAttribute()
+        attribute.readOnly =  v.readOnly
+        val variables = v.vars
+        variables.forEach { variable ->
+            attribute.name = variable?.name!!
+            val ref = variable.type!!.ref
+            if (ref is Node.TypeRef.Simple) {
+                attribute.type = ref.pieces[0].name
+            }
+        }
+        attribute.isConstructorParameter = false
+        return attribute
     }
 
 }
