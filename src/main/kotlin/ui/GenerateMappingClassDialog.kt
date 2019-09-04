@@ -42,7 +42,14 @@ class GenerateMappingClassDialog constructor(private val project: Project,
 
     override fun onSelectFirstClass() {
         val classTree = selectAFile()
+        panel.firstClassTree = classTree
         println("onSelectFirstClass: $classTree")
+    }
+
+    override fun onSelectSecondClass() {
+        val classTree = selectAFile()
+        panel.secondClassTree = classTree
+        println("onSelectSecondClass: $classTree")
     }
 
     private fun selectAFile(): ClassTree {
@@ -51,7 +58,7 @@ class GenerateMappingClassDialog constructor(private val project: Project,
 
         val classChooser = TreeFileChooserFactory.getInstance(project)
             .createFileChooser(
-                StringsBundle.message("select.first.class"),
+                StringsBundle.message("select.class"),
                 null,
                 kotlinType,
                 kotlinFileFilter

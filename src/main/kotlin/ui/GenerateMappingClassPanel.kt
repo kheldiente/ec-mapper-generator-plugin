@@ -1,35 +1,58 @@
 package ui
 
 import com.intellij.ui.components.JBCheckBox
-import extractor.data.ClassAttribute
+import com.intellij.ui.table.JBTable
+import extractor.data.ClassTree
 import utils.StringsBundle
+import ui.table.ClassTreeTableModel
+import ui.combobox.ClassAttributeComboBox
 import java.awt.Dimension
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.awt.event.ItemEvent
-import java.awt.event.ItemListener
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextField
+import javax.swing.*
 
-class GenerateMappingClassPanel: JPanel(), ItemListener, ActionListener {
+class GenerateMappingClassPanel: JPanel() {
 
     companion object {
+
         private val TAG = GenerateMappingClassPanel::class.java.simpleName
+
     }
 
     interface EventListener {
         fun onSelectFirstClass()
+        fun onSelectSecondClass()
     }
 
     private val txtBaseClassName = JTextField()
     private val txtClassName = JTextField()
     private val cbCreateBaseClass = JBCheckBox()
     private val lblFirstClass = JLabel()
+    private val lblSecondClass = JLabel()
+    private val tblClassAttributes = JBTable()
+    private val toggleCbBaseClass: (event: ItemEvent?) -> Unit = { event ->
+        if (event?.stateChange == ItemEvent.SELECTED) {
+            txtBaseClassName.isEnabled = true
+            txtBaseClassName.enableInputMethods(true)
+        } else if (event?.stateChange == ItemEvent.DESELECTED) {
+            txtBaseClassName.isEnabled = false
+            txtBaseClassName.enableInputMethods(false)
+        }
+    }
 
-    var firstClassAttributes = emptyList<ClassAttribute>()
-    var secondClassAttributes = emptyList<ClassAttribute>()
+    var firstClassTree = ClassTree()
+        set (value) {
+            field = value
+
+            refreshTable()
+            setupCellEditor()
+        }
+    var secondClassTree = ClassTree()
+        set (value) {
+            field = value
+
+            refreshTable()
+            setupCellEditor()
+        }
     var listener: EventListener? = null
     var baseClassName: String = ""
         set(value) {
@@ -47,14 +70,6 @@ class GenerateMappingClassPanel: JPanel(), ItemListener, ActionListener {
         get() {
             return txtClassName.text
         }
-    var firstClass: String = ""
-        set(value) {
-            field = value
-            lblFirstClass.text = value
-        }
-        get() {
-            return lblFirstClass.text
-        }
 
     init {
         setup()
@@ -71,7 +86,7 @@ class GenerateMappingClassPanel: JPanel(), ItemListener, ActionListener {
         add(txtBaseClassName)
 
         cbCreateBaseClass.setBounds(325, 33, 50, 50)
-        cbCreateBaseClass.addItemListener(this)
+        cbCreateBaseClass.addItemListener { event -> toggleCbBaseClass(event) }
         cbCreateBaseClass.isSelected = true
         add(cbCreateBaseClass)
 
@@ -83,30 +98,40 @@ class GenerateMappingClassPanel: JPanel(), ItemListener, ActionListener {
         add(txtClassName)
 
         val btnSelectFirstClass = JButton(StringsBundle.message("select.first.class"))
-        btnSelectFirstClass.setBounds(25, 121, 77, 50)
-        btnSelectFirstClass.addActionListener(this)
+        btnSelectFirstClass.setBounds(25, 130, 77, 50)
+        btnSelectFirstClass.addActionListener { listener?.onSelectFirstClass() }
         add(btnSelectFirstClass)
 
         lblFirstClass.setBounds(110, 140, 150, 16)
         add(lblFirstClass)
 
-        println("Rendered $TAG")
+        val btnSelectSecondClass = JButton(StringsBundle.message("select.second.class"))
+        btnSelectSecondClass.setBounds(180, 130, 77, 50)
+        btnSelectSecondClass.addActionListener { listener?.onSelectSecondClass() }
+        add(btnSelectSecondClass)
+
+        lblSecondClass.setBounds(280, 140, 150, 16)
+        add(lblSecondClass)
+
+        tblClassAttributes.setBounds(25, 210, 300, 500)
+        tblClassAttributes.model = ClassTreeTableModel(firstClassTree, secondClassTree)
+        add(tblClassAttributes)
     }
 
     override fun getPreferredSize(): Dimension = Dimension(500, 500)
 
-    override fun itemStateChanged(event: ItemEvent?) {
-        if (event?.stateChange == ItemEvent.SELECTED) {
-            txtBaseClassName.isEnabled = true
-            txtBaseClassName.enableInputMethods(true)
-        } else if (event?.stateChange == ItemEvent.DESELECTED) {
-            txtBaseClassName.isEnabled = false
-            txtBaseClassName.enableInputMethods(false)
-        }
+    private fun refreshTable() {
+        lblFirstClass.text = firstClassTree.name
+        lblSecondClass.text = secondClassTree.name
+        tblClassAttributes.model = ClassTreeTableModel(firstClassTree, secondClassTree)
     }
 
-    override fun actionPerformed(e: ActionEvent?) {
-        listener?.onSelectFirstClass()
+    private fun setupCellEditor() {
+        val columnFirst = tblClassAttributes.columnModel.getColumn(0)
+        val columnSecond = tblClassAttributes.columnModel.getColumn(1)
+
+        columnFirst.cellEditor = DefaultCellEditor(ClassAttributeComboBox(firstClassTree.attributes))
+        columnSecond.cellEditor = DefaultCellEditor(ClassAttributeComboBox(secondClassTree.attributes))
     }
 
 }
