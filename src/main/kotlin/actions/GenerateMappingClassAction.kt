@@ -6,8 +6,8 @@ import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiManager
-import com.intellij.psi.impl.file.PsiDirectoryFactory
 import ui.GenerateMappingClassDialog
+import utils.ClassParser
 
 class GenerateMappingClassAction: AnAction() {
 
@@ -17,10 +17,10 @@ class GenerateMappingClassAction: AnAction() {
         directory = getDirectory(event) ?: return
 
         val project = event.project!!
-        val absolutePath = getAbsolutePath(directory!!)
-        println("absolute path of action: $absolutePath")
+        val path = ClassParser.getDirectoryPath(directory!!)
+        println("path of action: $path")
 
-        val dialog = GenerateMappingClassDialog(project, absolutePath)
+        val dialog = GenerateMappingClassDialog(project, path)
         dialog.show()
     }
 
@@ -48,11 +48,6 @@ class GenerateMappingClassAction: AnAction() {
                 }
             }
             return directory
-        }
-
-        private fun getAbsolutePath(directory: PsiDirectory): String {
-            val directoryFactory = PsiDirectoryFactory.getInstance(directory.project)
-            return directoryFactory.getQualifiedName(directory, true)
         }
 
     }

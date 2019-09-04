@@ -37,7 +37,6 @@ class GenerateMappingClassDialog constructor(private val project: Project,
         )
 
         generator.execute(config)
-        project.save()
     }
 
     override fun onSelectFirstClass() {
