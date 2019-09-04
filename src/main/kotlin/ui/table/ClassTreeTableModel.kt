@@ -1,5 +1,6 @@
 package ui.table
 
+import extractor.data.ClassAttribute
 import extractor.data.ClassTree
 import javax.swing.table.AbstractTableModel
 import kotlin.math.max
@@ -18,8 +19,8 @@ class ClassTreeTableModel(private val firstClassTree: ClassTree? = null,
     private var data: Array<ArrayList<String>>
 
     init {
-        val firstClassTreeAttr = ArrayList(firstClassTree?.attributes!!.map { attr -> "${attr.name}: ${attr.type}" })
-        val secondClassTreeAttr = ArrayList(secondClassTree?.attributes!!.map { attr -> "${attr.name}: ${attr.type}" })
+        val firstClassTreeAttr = ArrayList(firstClassTree?.attributes!!.map { attr -> attr.toString() })
+        val secondClassTreeAttr = ArrayList(secondClassTree?.attributes!!.map { attr -> attr.toString() })
         data =  arrayOf(firstClassTreeAttr, secondClassTreeAttr)
     }
 
@@ -46,6 +47,15 @@ class ClassTreeTableModel(private val firstClassTree: ClassTree? = null,
         data[columnIndex][rowIndex] = aValue.toString()
         fireTableCellUpdated(rowIndex, columnIndex)
         println("setValueAt: $aValue")
+    }
+
+    fun getTableData(): List<List<ClassAttribute>> {
+        return data.mapIndexed { index, attrWithTypes ->
+            val classAttributeRef = if (index == 0) firstClassTree?.attributes else secondClassTree?.attributes
+            attrWithTypes.map { key ->
+                classAttributeRef?.firstOrNull { attr -> attr.id.equals(key, ignoreCase = true) } ?: ClassAttribute()
+            }.filterNot { attr -> attr.name.isEmpty() || attr.type.isEmpty() }
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package ui
 
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.table.JBTable
+import extractor.data.ClassAttribute
 import extractor.data.ClassTree
 import utils.StringsBundle
 import ui.table.ClassTreeTableModel
@@ -29,15 +30,6 @@ class GenerateMappingClassPanel: JPanel() {
     private val lblFirstClass = JLabel()
     private val lblSecondClass = JLabel()
     private val tblClassAttributes = JBTable()
-    private val toggleCbBaseClass: (event: ItemEvent?) -> Unit = { event ->
-        if (event?.stateChange == ItemEvent.SELECTED) {
-            txtBaseClassName.isEnabled = true
-            txtBaseClassName.enableInputMethods(true)
-        } else if (event?.stateChange == ItemEvent.DESELECTED) {
-            txtBaseClassName.isEnabled = false
-            txtBaseClassName.enableInputMethods(false)
-        }
-    }
 
     var firstClassTree = ClassTree()
         set (value) {
@@ -70,6 +62,17 @@ class GenerateMappingClassPanel: JPanel() {
         get() {
             return txtClassName.text
         }
+
+    private var tblModelClass = ClassTreeTableModel(firstClassTree, secondClassTree)
+    private val toggleCbBaseClass: (event: ItemEvent?) -> Unit = { event ->
+        if (event?.stateChange == ItemEvent.SELECTED) {
+            txtBaseClassName.isEnabled = true
+            txtBaseClassName.enableInputMethods(true)
+        } else if (event?.stateChange == ItemEvent.DESELECTED) {
+            txtBaseClassName.isEnabled = false
+            txtBaseClassName.enableInputMethods(false)
+        }
+    }
 
     init {
         setup()
@@ -114,16 +117,20 @@ class GenerateMappingClassPanel: JPanel() {
         add(lblSecondClass)
 
         tblClassAttributes.setBounds(25, 210, 300, 500)
-        tblClassAttributes.model = ClassTreeTableModel(firstClassTree, secondClassTree)
+        tblClassAttributes.model = tblModelClass
         add(tblClassAttributes)
     }
 
     override fun getPreferredSize(): Dimension = Dimension(500, 500)
 
+    fun getTableData(): List<List<ClassAttribute>> = tblModelClass.getTableData()
+
     private fun refreshTable() {
         lblFirstClass.text = firstClassTree.name
         lblSecondClass.text = secondClassTree.name
-        tblClassAttributes.model = ClassTreeTableModel(firstClassTree, secondClassTree)
+
+        tblModelClass = ClassTreeTableModel(firstClassTree, secondClassTree)
+        tblClassAttributes.model = tblModelClass
     }
 
     private fun setupCellEditor() {

@@ -6,7 +6,6 @@ import java.io.File
 class BaseClassFile: GeneratedFile {
 
     override fun execute(className: String, path: String) {
-
         val mapFromFunction = FunSpec.builder("mapFrom")
             .addModifiers(KModifier.ABSTRACT, KModifier.PUBLIC)
             .addParameter("from", TypeVariableName("E"))

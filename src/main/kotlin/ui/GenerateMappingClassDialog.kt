@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import common.BaseDialogWrapper
 import common.MessageDialog
-import generator.KotlinMappingClassGenerator
 import generator.MappingClassConfig
 import extractor.data.ClassTree
 import utils.StringsBundle
@@ -27,17 +26,24 @@ class GenerateMappingClassDialog constructor(private val project: Project,
     override fun createCenterPanel(): JComponent? = panel
 
     override fun doOKAction() {
-        super.doOKAction()
+        val isAllowed = presenter.allowedToGenerateMappers()
+                && presenter.canBeMapped(panel.getTableData())
+        println("allowed to generate: $isAllowed")
 
-        val generator = KotlinMappingClassGenerator()
-        val config = MappingClassConfig(
-            hasBaseClass = true,
-            baseClassName = panel.baseClassName,
-            className = panel.className,
-            path = absolutePath
-        )
+        if (isAllowed) {
+            val config = MappingClassConfig(
+                hasBaseClass = true,
+                baseClassName = panel.baseClassName,
+                className = panel.className,
+                path = absolutePath
+            )
+            if (config.hasBaseClass) {
+                // presenter.generateBaseClass(config)
+            }
 
-        generator.execute(config)
+            presenter.generateMappingClass(config, panel.getTableData())
+            super.doOKAction()
+        }
     }
 
     override fun onSelectFirstClass() {

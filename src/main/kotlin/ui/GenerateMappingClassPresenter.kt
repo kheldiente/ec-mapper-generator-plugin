@@ -4,7 +4,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import extractor.DataClassExtractor
 import extractor.KotlinClassExtractor
+import extractor.data.ClassAttribute
 import extractor.data.ClassTree
+import generator.KotlinMappingClassGenerator
+import generator.MappingClassConfig
+import generator.file.MappingClassFile
 import utils.ClassParser
 import javax.inject.Inject
 
@@ -28,6 +32,24 @@ class GenerateMappingClassPresenter @Inject constructor(private val view: Genera
             else -> KotlinClassExtractor()
         }
         return extractor.execute(virtualFile)
+    }
+
+    fun generateBaseClass(config: MappingClassConfig) {
+        val generator = KotlinMappingClassGenerator()
+        generator.execute(config)
+    }
+
+    fun generateMappingClass(config: MappingClassConfig, attrToMap: List<List<ClassAttribute>>) {
+
+    }
+
+    fun canBeMapped(attributeToMap: List<List<ClassAttribute>>): Boolean {
+        return MappingClassFile.canBeMapped(attributeToMap)
+    }
+
+    fun allowedToGenerateMappers(): Boolean {
+        return firstClassTree != null
+                && secondClassTree != null
     }
 
     fun hasBeenLoaded(classTree: ClassTree): Boolean {
