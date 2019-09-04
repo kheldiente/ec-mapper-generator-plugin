@@ -15,6 +15,14 @@ class ClassTreeTableModel(private val firstClassTree: ClassTree? = null,
 
     }
 
+    private var data: Array<ArrayList<String>>
+
+    init {
+        val firstClassTreeAttr = ArrayList(firstClassTree?.attributes!!.map { attr -> "${attr.name}: ${attr.type}" })
+        val secondClassTreeAttr = ArrayList(secondClassTree?.attributes!!.map { attr -> "${attr.name}: ${attr.type}" })
+        data =  arrayOf(firstClassTreeAttr, secondClassTreeAttr)
+    }
+
     override fun getRowCount(): Int = max(firstClassTree?.attributes!!.size, secondClassTree?.attributes!!.size)
 
     override fun getColumnCount(): Int = DEFAULT_COLUMN_COUNT
@@ -27,12 +35,17 @@ class ClassTreeTableModel(private val firstClassTree: ClassTree? = null,
     }
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
-        val attribute = if (columnIndex == 0) {
-            firstClassTree?.attributes!!.getOrNull(rowIndex) ?: return ""
-        } else {
-            secondClassTree?.attributes!!.getOrNull(rowIndex) ?: return ""
-        }
-        return "${attribute.name}: ${attribute.type}"
+        return data[columnIndex].getOrNull(rowIndex) ?: return ""
+    }
+
+    override fun isCellEditable(rowIndex: Int, columnIndex: Int): Boolean = true
+
+    override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {
+        super.setValueAt(aValue, rowIndex, columnIndex)
+
+        data[columnIndex][rowIndex] = aValue.toString()
+        fireTableCellUpdated(rowIndex, columnIndex)
+        println("setValueAt: $aValue")
     }
 
 }
