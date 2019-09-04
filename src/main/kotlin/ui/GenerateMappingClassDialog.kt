@@ -4,8 +4,9 @@ import com.intellij.ide.util.TreeFileChooser
 import com.intellij.ide.util.TreeFileChooserFactory
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.io.FileUtil
+import common.BaseDialogWrapper
+import common.MessageDialog
 import generator.KotlinMappingClassGenerator
 import generator.MappingClassConfig
 import extractor.data.ClassTree
@@ -13,7 +14,7 @@ import utils.StringsBundle
 import javax.swing.JComponent
 
 class GenerateMappingClassDialog constructor(private val project: Project,
-                                             private val absolutePath: String): DialogWrapper(true), GenerateMappingClassPanel.EventListener {
+                                             private val absolutePath: String): BaseDialogWrapper(true), GenerateMappingClassPanel.EventListener {
 
     private val presenter: GenerateMappingClassPresenter = GenerateMappingClassPresenter(this, project)
     private val panel = GenerateMappingClassPanel()
@@ -41,14 +42,26 @@ class GenerateMappingClassDialog constructor(private val project: Project,
 
     override fun onSelectFirstClass() {
         val classTree = selectAFile()
-        panel.firstClassTree = classTree
-        println("onSelectFirstClass: $classTree")
+        if (!presenter.hasBeenLoaded(classTree)) {
+            presenter.setFirstClass(classTree)
+            panel.firstClassTree = classTree
+            println("onSelectFirstClass: $classTree")
+        } else {
+            val messageDialog = MessageDialog(StringsBundle.message("error.class.loaded"))
+            messageDialog.show()
+        }
     }
 
     override fun onSelectSecondClass() {
         val classTree = selectAFile()
-        panel.secondClassTree = classTree
-        println("onSelectSecondClass: $classTree")
+        if (!presenter.hasBeenLoaded(classTree)) {
+            presenter.setSecondClass(classTree)
+            panel.secondClassTree = classTree
+            println("onSelectSecondClass: $classTree")
+        } else {
+            val messageDialog = MessageDialog(StringsBundle.message("error.class.loaded"))
+            messageDialog.show()
+        }
     }
 
     private fun selectAFile(): ClassTree {
