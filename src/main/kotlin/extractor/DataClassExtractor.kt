@@ -16,7 +16,7 @@ class DataClassExtractor: ClassExtractor() {
     }
 
     override fun execute(virtualFile: VirtualFile): ClassTree {
-        val classTree = ClassTree(name = virtualFile.name)
+        val classTree = ClassTree(name = virtualFile.name, path = virtualFile.path)
         val code = String(virtualFile.contentsToByteArray())
         val nodeFile = ClassParser.parse(code)
         classTree.attributes = getAttributes(nodeFile)

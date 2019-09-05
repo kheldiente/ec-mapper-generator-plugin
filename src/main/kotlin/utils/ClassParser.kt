@@ -51,8 +51,31 @@ object ClassParser {
      */
     fun getDirectoryPath(directory: PsiDirectory): String {
         val originalPath = directory.files[0].virtualFile.path
+        return trimClassFile(originalPath)
+    }
+
+    /**
+     * Input: C:\Users\Michael Diente\Documents\TestApp\app\src\main\java\com\example\testapp\data
+     * Output: com.example.testapp.data
+     */
+    fun getPackageNameFromDirectoryPath(directoryPath: String): String {
+        val sanitizedPath = directoryPath.replace("\\" , "/")
+        val trimmed = sanitizedPath.split("/java")
+        val removedSpecialChars = trimmed[1].split("/")
+        return removedSpecialChars.filter { value -> value.isNotEmpty() }.joinToString(".")
+    }
+
+    /**
+     * Input: com.example.test.data.StudentEntity.kt
+     * Output: com.example.test.data
+     */
+    fun getPackageName(projectPath: String): String {
+        return trimClassFile(projectPath).dropLast(1)
+    }
+
+    private fun trimClassFile(directoryPath: String): String {
         val removeRegex = Regex("\\w+.kt")
-        return removeRegex.replace(originalPath, "")
+        return removeRegex.replace(directoryPath, "")
     }
 
 }

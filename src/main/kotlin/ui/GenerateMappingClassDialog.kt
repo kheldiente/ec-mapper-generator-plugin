@@ -7,13 +7,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import common.BaseDialogWrapper
 import common.MessageDialog
-import generator.MappingClassConfig
+import generator.config.MappingClassConfig
 import extractor.data.ClassTree
 import utils.StringsBundle
 import javax.swing.JComponent
 
 class GenerateMappingClassDialog constructor(private val project: Project,
-                                             private val absolutePath: String): BaseDialogWrapper(true), GenerateMappingClassPanel.EventListener {
+                                             private val directoryPath: String): BaseDialogWrapper(true), GenerateMappingClassPanel.EventListener {
 
     private val presenter: GenerateMappingClassPresenter = GenerateMappingClassPresenter(this, project)
     private val panel = GenerateMappingClassPanel()
@@ -35,13 +35,13 @@ class GenerateMappingClassDialog constructor(private val project: Project,
                 hasBaseClass = true,
                 baseClassName = panel.baseClassName,
                 className = panel.className,
-                path = absolutePath
+                path = directoryPath
             )
+
             if (config.hasBaseClass) {
                 // presenter.generateBaseClass(config)
             }
-
-            presenter.generateMappingClass(config, panel.getTableData())
+            presenter.generateMappingClass(config, getFinalClassesToMap())
             super.doOKAction()
         }
     }
@@ -68,6 +68,16 @@ class GenerateMappingClassDialog constructor(private val project: Project,
             val messageDialog = MessageDialog(StringsBundle.message("error.class.loaded"))
             messageDialog.show()
         }
+    }
+
+    private fun getFinalClassesToMap(): List<ClassTree> {
+        val firstClassTree = presenter.getFirstClass()!!
+        val secondClassTree = presenter.getSecondClass()!!
+        val finalAttributes = panel.getTableData()
+
+        firstClassTree.attributes = finalAttributes[0]
+        secondClassTree.attributes = finalAttributes[1]
+        return listOf(firstClassTree, secondClassTree)
     }
 
     private fun selectAFile(): ClassTree {

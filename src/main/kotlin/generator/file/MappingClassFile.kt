@@ -1,32 +1,105 @@
 package generator.file
 
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.*
+import exception.GeneratedFileException
 import extractor.data.ClassAttribute
+import extractor.data.ClassTree
+import generator.config.GeneratedFileConfig
+import utils.ClassParser
 import java.io.File
+import kotlin.math.min
 
 class MappingClassFile: GeneratedFile {
 
-    var classesToMap: Array<ArrayList<String>> = emptyArray()
+    var classesToMap: List<ClassTree> = emptyList()
 
-    override fun execute(className: String, path: String) {
-        val mapFromFunction = FunSpec.builder("mapFrom")
-            .addModifiers(KModifier.ABSTRACT, KModifier.PUBLIC)
-            .build()
+    override fun execute(config: GeneratedFileConfig) {
+        try {
+            if (classesToMap.size != EXPECTED_NO_OF_CLASSES) {
+                throw GeneratedFileException()
+            }
 
-        val mapToFunction = FunSpec.builder("mapTo")
-            .addModifiers(KModifier.ABSTRACT, KModifier.PUBLIC)
-            .build()
+            val firstClass = classesToMap[0]
+            val secondClass = classesToMap[1]
+            val packageName = ClassParser.getPackageNameFromDirectoryPath(ClassParser.getPackageName(config.destinationPath))
+            println("$TAG => packageName: $packageName")
 
-        val file = FileSpec.builder("", className)
-            .addType(TypeSpec.classBuilder(className).build())
-            .build()
-        file.writeTo(File(path))
+            val classFile = FileSpec.builder("", config.className)
+                .addType(TypeSpec.classBuilder(config.className)
+                    .addFunction(buildMapFunc("mapFrom", "from", firstClass, secondClass).build())
+                    .addFunction(buildMapFunc("mapTo", "to", secondClass, firstClass).build())
+                    .build())
+                .build()
+            classFile.writeTo(File(config.destinationPath))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun buildMapFunc(name: String,
+                             paramName: String,
+                             classTreeParameter: ClassTree,
+                             classTreeReturned: ClassTree): FunSpec.Builder {
+
+        val paramPackageName = ClassParser.getPackageNameFromDirectoryPath(ClassParser.getPackageName(classTreeParameter.path))
+        val returnedPackageName = ClassParser.getPackageNameFromDirectoryPath(ClassParser.getPackageName(classTreeReturned.path))
+        val classParameter = ClassName(paramPackageName, classTreeParameter.getFormattedName())
+        val classReturned = ClassName(returnedPackageName, classTreeReturned.getFormattedName())
+        println("$name => paramPackageName: $paramPackageName, returnedPackagedName: $returnedPackageName")
+
+        val function = FunSpec.builder(name)
+            .addModifiers(KModifier.PUBLIC)
+            .addParameter(paramName, classParameter)
+            .returns(classReturned)
+
+        val objectName = "temp"
+        var constructorCode = ""
+        var memberAssignCode = ""
+
+        val maxIndex = min(classTreeParameter.attributes.lastIndex, classTreeReturned.attributes.lastIndex)
+        for (index in 0..maxIndex) {
+            val paramAttr = classTreeParameter.attributes[index]
+            val returnAttr = classTreeReturned.attributes[index]
+
+            val isAssigningToConstructor = returnAttr.isConstructorParameter
+            val attrParamName = paramAttr.name
+            val attrReturnName = returnAttr.name
+
+            println("$name => attrParamName: $attrParamName, attrReturnName: $attrReturnName")
+            if (isAssigningToConstructor) {
+                constructorCode += if (index < maxIndex) {
+                    "$attrReturnName = $paramName.$attrParamName,"
+                } else {
+                    "$attrReturnName = $paramName.$attrParamName"
+                }
+            } else {
+                memberAssignCode += "\n$objectName.$attrReturnName = $paramName.$attrParamName"
+            }
+        }
+
+        var body = ""
+        if (memberAssignCode.isNotEmpty()) {
+            body += if (constructorCode.isNotEmpty()) {
+                "val $objectName = ${classTreeReturned.getFormattedName()}($constructorCode)"
+            } else {
+                "val $objectName = ${classTreeReturned.getFormattedName()}()"
+            }
+            body += memberAssignCode
+            body += "\nreturn $objectName"
+        } else {
+            body += "return ${classTreeReturned.getFormattedName()}($constructorCode)"
+        }
+
+        function.addStatement(body)
+        println("$name => successfully built $name()")
+
+        return function
     }
 
     companion object {
+
+        private val TAG = MappingClassFile::class.java.simpleName
+        private const val EXPECTED_NO_OF_CLASSES = 2
 
         /**
          * Requirements:

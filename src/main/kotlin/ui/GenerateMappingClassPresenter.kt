@@ -7,13 +7,15 @@ import extractor.KotlinClassExtractor
 import extractor.data.ClassAttribute
 import extractor.data.ClassTree
 import generator.KotlinMappingClassGenerator
-import generator.MappingClassConfig
+import generator.config.MappingClassConfig
 import generator.file.MappingClassFile
 import utils.ClassParser
 import javax.inject.Inject
 
 class GenerateMappingClassPresenter @Inject constructor(private val view: GenerateMappingClassDialog,
                                                         private val project: Project) {
+
+    private val generator = KotlinMappingClassGenerator()
 
     private var firstClassTree: ClassTree? = null
     private var secondClassTree: ClassTree? = null
@@ -26,6 +28,10 @@ class GenerateMappingClassPresenter @Inject constructor(private val view: Genera
         this.secondClassTree = classTree
     }
 
+    fun getFirstClass(): ClassTree? = firstClassTree
+
+    fun getSecondClass(): ClassTree? = secondClassTree
+
     fun getClassTree(virtualFile: VirtualFile): ClassTree {
         val extractor = when (ClassParser.getType(virtualFile)) {
             ClassParser.Type.DATA_CLASS -> DataClassExtractor()
@@ -34,13 +40,8 @@ class GenerateMappingClassPresenter @Inject constructor(private val view: Genera
         return extractor.execute(virtualFile)
     }
 
-    fun generateBaseClass(config: MappingClassConfig) {
-        val generator = KotlinMappingClassGenerator()
-        generator.execute(config)
-    }
-
-    fun generateMappingClass(config: MappingClassConfig, attrToMap: List<List<ClassAttribute>>) {
-
+    fun generateMappingClass(config: MappingClassConfig, attrToMap: List<ClassTree>) {
+        generator.execute(config, attrToMap)
     }
 
     fun canBeMapped(attributeToMap: List<List<ClassAttribute>>): Boolean {

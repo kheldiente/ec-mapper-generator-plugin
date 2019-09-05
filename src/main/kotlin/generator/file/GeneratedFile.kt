@@ -1,5 +1,7 @@
 package generator.file
 
+import generator.config.GeneratedFileConfig
+
 interface GeneratedFile {
-    fun execute(className: String, path: String)
+    fun execute(config: GeneratedFileConfig)
 }

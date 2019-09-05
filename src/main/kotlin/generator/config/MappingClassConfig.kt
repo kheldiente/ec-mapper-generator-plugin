@@ -1,4 +1,4 @@
-package generator
+package generator.config
 
 data class MappingClassConfig(
         val hasBaseClass: Boolean,
